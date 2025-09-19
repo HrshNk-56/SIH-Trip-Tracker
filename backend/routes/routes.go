@@ -13,4 +13,8 @@ func SetUpRoutes(e *echo.Echo) {
 	e.GET("/api/user", controllers.User)
 	e.POST("/logout", controllers.Logout)
 	e.POST("/refresh", controllers.Refresh)
+
+	// Trip Header (singleton) endpoints
+	e.GET("/api/trip-header", controllers.GetTripHeader)
+	e.PUT("/api/trip-header", controllers.UpsertTripHeader)
 }

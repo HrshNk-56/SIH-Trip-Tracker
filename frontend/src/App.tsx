@@ -7,8 +7,8 @@ import { useState, useEffect, createContext, useContext } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import TripOverview from "@/components/TripOverview";
 import BudgetTracker from "@/components/BudgetTracker";
-import WeatherWidget from "@/components/WeatherWidget";
 import QuickActions from "@/components/QuickActions";
+import { TripStateProvider } from "@/context/TripState";
 import { MapPin, Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -137,6 +137,11 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  // Notifications state (empty by default)
+  const [notifOpen, setNotifOpen] = useState(false);
+  type Noti = { id: string; title: string; body?: string; time: string; read?: boolean };
+  const [notifications, setNotifications] = useState<Noti[]>([]);
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   if (!user) {
     return (
@@ -163,9 +168,13 @@ const Dashboard: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" className="relative">
+              <Button variant="ghost" size="sm" className="relative" onClick={()=>setNotifOpen(true)} aria-label="Open notifications">
                 <Bell className="w-4 h-4" />
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">2</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
               </Button>
               
               <div className="flex items-center space-x-3">
@@ -189,7 +198,45 @@ const Dashboard: React.FC = () => {
         </div>
       </nav>
 
+      {/* Notification Drawer */}
+      {notifOpen && (
+        <div className="fixed inset-0 z-50">
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/30" onClick={()=>setNotifOpen(false)} />
+          {/* Panel */}
+          <div className="absolute right-0 top-0 h-full w-80 bg-background border-l border-border shadow-xl flex flex-col">
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <h3 className="font-semibold">Notifications</h3>
+              <div className="flex items-center gap-2">
+                <button
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                  onClick={()=>setNotifications([])}
+                  disabled={notifications.length===0}
+                >
+                  Clear All
+                </button>
+                <button className="text-sm" onClick={()=>setNotifOpen(false)} aria-label="Close">✕</button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-auto p-3 space-y-2">
+              {notifications.length === 0 ? (
+                <div className="text-sm text-muted-foreground p-4">No notifications yet.</div>
+              ) : (
+                notifications.map(n => (
+                  <div key={n.id} className="p-3 rounded-lg border border-border bg-card">
+                    <div className="text-sm font-medium">{n.title}</div>
+                    {n.body && <div className="text-xs text-muted-foreground mt-1">{n.body}</div>}
+                    <div className="text-[10px] text-muted-foreground mt-1">{n.time}</div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Dashboard Content */}
+      <TripStateProvider>
       <main className="max-w-7xl mx-auto">
         {/* Dashboard Header */}
         <div className="lg:hidden">
@@ -219,7 +266,6 @@ const Dashboard: React.FC = () => {
               {/* Middle Column - Budget & Weather */}
               <div className="space-y-6">
                 <BudgetTracker />
-                <WeatherWidget />
               </div>
               
               {/* Right Column - Additional Content */}
@@ -290,11 +336,11 @@ const Dashboard: React.FC = () => {
           <div className="space-y-4 pb-6">
             <TripOverview />
             <BudgetTracker />
-            <WeatherWidget />
             <QuickActions />
           </div>
         </div>
       </main>
+      </TripStateProvider>
     </div>
   );
 };

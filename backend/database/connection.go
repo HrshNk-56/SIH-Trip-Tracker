@@ -19,7 +19,7 @@ func ConnectDB() (*gorm.DB, error) {
 	}
 
 	DB = db
-	db.AutoMigrate(&models.User{}) //automatically creates or updates database tables based on the provided Go structs
+db.AutoMigrate(&models.User{}, &models.TripHeader{}) //automatically creates or updates database tables based on the provided Go structs
 
 	return db, nil
 }

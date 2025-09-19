@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 const WeatherWidget = () => {
   const weatherData = {
     current: {
-      location: "Tokyo, Japan",
+      location: "Kochi, Kerala",
       temperature: 18,
       condition: "Partly Cloudy",
       humidity: 65,
