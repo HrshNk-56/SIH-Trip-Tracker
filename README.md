@@ -1,1 +1,1 @@
-# Teamp MapMyWay | Trip Tracker
+# Team MapMyWay | Trip Tracker
