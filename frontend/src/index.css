@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* 🌴 Southern Kerala Coastal Theme Colors 🌴 */
+    
+    /* Backwater morning mist & sand */
+    --background: 45 30% 96%; /* Soft pearl white like morning beach */
+    --foreground: 25 50% 15%; /* Deep coconut brown */
+
+    /* Coconut shell & palm fronds */
+    --card: 45 20% 98%; /* Coconut white */
+    --card-foreground: 25 40% 20%; /* Rich earth brown */
+
+    --popover: 45 20% 98%;
+    --popover-foreground: 25 40% 20%;
+
+    /* Sunset over Kovalam Beach */
+    --primary: 15 85% 55%; /* Deep sunset orange-red */
+    --primary-foreground: 45 20% 98%;
+    --primary-glow: 25 80% 65%; /* Warm sunset glow */
+
+    /* Varkala cliff sandstone */
+    --secondary: 40 35% 92%; /* Sandy beige */
+    --secondary-foreground: 25 40% 25%;
+
+    /* Coastal morning mist */
+    --muted: 180 15% 88%; /* Soft blue-gray mist */
+    --muted-foreground: 25 30% 45%; /* Weathered driftwood */
+
+    /* Backwater teal & lagoon blue */
+    --accent: 175 60% 40%; /* Backwater teal */
+    --accent-foreground: 45 20% 98%;
+    --accent-light: 185 45% 70%; /* Light lagoon blue */
+
+    /* Coconut palm green */
+    --success: 145 40% 88%; /* Soft palm green */
+    --success-foreground: 145 60% 35%; /* Deep palm green */
+
+    /* Turmeric & spice market */
+    --warning: 45 90% 55%; /* Turmeric golden */
+    --warning-foreground: 25 40% 15%;
+
+    /* Coral reef accent */
+    --destructive: 10 75% 55%; /* Coral red */
+    --destructive-foreground: 45 20% 98%;
+
+    /* Driftwood & sea foam */
+    --border: 180 20% 80%; /* Light driftwood */
+    --input: 45 30% 95%; /* Sea foam white */
+    --ring: 15 85% 55%; /* Sunset ring */
+
+    /* 🌅 Kerala Coastal Gradients 🌅 */
+    --gradient-primary: linear-gradient(135deg, hsl(15, 85%, 55%), hsl(25, 80%, 65%)); /* Kovalam sunset */
+    --gradient-hero: linear-gradient(135deg, hsl(175, 60%, 40%), hsl(185, 45%, 70%)); /* Backwater dreams */
+    --gradient-card: linear-gradient(145deg, hsl(45, 20%, 98%), hsl(40, 35%, 92%)); /* Coconut to sand */
+    --gradient-accent: linear-gradient(135deg, hsl(175, 60%, 40%), hsl(145, 60%, 45%)); /* Teal to palm */
+    
+    /* Soft shadows for cards */
+    --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-card-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    
+    /* Mobile-optimized transitions */
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius: 1.25rem; /* rounded-xl for mobile cards */
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  /* Mobile-first container */
+  .mobile-container {
+    max-width: 420px;
+    margin: 0 auto;
+    background-color: hsl(var(--card));
+    min-height: 100vh;
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  
+  /* Card styles matching the design */
+  .mobile-card {
+    background-color: hsl(var(--card));
+    border-radius: 1.25rem;
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-smooth);
+  }
+  
+  .mobile-card:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+}
