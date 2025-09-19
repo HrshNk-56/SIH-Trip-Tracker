@@ -1,2 +1,1 @@
-# Trip-Tracker
-SIH 2025 | 25082 | 
+# Teamp MapMyWay | Trip Tracker
