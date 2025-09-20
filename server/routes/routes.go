@@ -13,4 +13,5 @@ func SetUpRoutes(e *echo.Echo) {
 	e.GET("/api/user", controllers.User)
 	e.POST("/logout", controllers.Logout)
 	e.POST("/refresh", controllers.Refresh)
+	e.POST("/api/process-image", controllers.ProcessImage)
 }
