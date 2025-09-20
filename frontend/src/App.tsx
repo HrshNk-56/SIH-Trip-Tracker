@@ -2,15 +2,17 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useState, useEffect, createContext, useContext } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
-import TripOverview from "@/components/TripOverview";
-import BudgetTracker from "@/components/BudgetTracker";
-import QuickActions from "@/components/QuickActions";
+// import TripOverview from "@/components/TripOverview";
+// StartPlanner removed from dashboard; planning moved to hero card
+import TravelBy from "@/components/TravelBy";
 import { TripStateProvider } from "@/context/TripState";
 import { MapPin, Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import DayItinerary from "@/pages/DayItinerary";
+import ChooseTransportPage from "@/pages/ChooseTransport";
 
 const queryClient = new QueryClient();
 
@@ -256,16 +258,10 @@ const Dashboard: React.FC = () => {
             </div>
             
             {/* Desktop Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Trip Overview */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Start Planner */}
               <div className="space-y-6">
-                <TripOverview />
-                <QuickActions />
-              </div>
-              
-              {/* Middle Column - Budget & Weather */}
-              <div className="space-y-6">
-                <BudgetTracker />
+                <TravelBy navigateOnSelect={false} />
               </div>
               
               {/* Right Column - Additional Content */}
@@ -334,9 +330,7 @@ const Dashboard: React.FC = () => {
         {/* Mobile Layout */}
         <div className="lg:hidden">
           <div className="space-y-4 pb-6">
-            <TripOverview />
-            <BudgetTracker />
-            <QuickActions />
+            <TravelBy navigateOnSelect={false} />
           </div>
         </div>
       </main>
@@ -368,29 +362,7 @@ const TripsPage: React.FC = () => {
   );
 };
 
-const BudgetPage: React.FC = () => {
-  const { user } = useAuth();
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Budget Management</h1>
-        <BudgetTracker />
-      </div>
-    </div>
-  );
-};
-
-const WeatherPage: React.FC = () => {
-  const { user } = useAuth();
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Weather Forecast</h1>
-        <WeatherWidget />
-      </div>
-    </div>
-  );
-};
+// Redirect /itinerary to day 1; day-specific page handled below
 
 // Protected Route wrapper
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -414,25 +386,40 @@ const App = () => (
           <BrowserRouter>
             <Toaster />
             <Sonner />
+            {/* Global brand logo visible on all pages */}
+            <a href="/" className="fixed top-3 left-3 z-50 flex items-center gap-2 bg-card/80 backdrop-blur-md border border-border rounded-full px-3 py-1 shadow hover:bg-card">
+              <div className="w-6 h-6 bg-gradient-to-br from-primary to-primary-glow rounded-full flex items-center justify-center">
+                <MapPin className="w-3.5 h-3.5 text-primary-foreground" />
+              </div>
+              <span className="text-xs font-semibold text-foreground">Map My Trip</span>
+            </a>
             <Routes>
               <Route path="/" element={
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
               } />
-              <Route path="/trips" element={
+              <Route path="/choose-transport" element={
                 <ProtectedRoute>
-                  <TripsPage />
+                  <div className="min-h-screen bg-background">
+                    <TripStateProvider>
+                      <div className="max-w-2xl mx-auto p-4">
+                        <ChooseTransportPage />
+                      </div>
+                    </TripStateProvider>
+                  </div>
                 </ProtectedRoute>
               } />
-              <Route path="/budget" element={
+              <Route path="/itinerary" element={<Navigate to="/itinerary/day/1" replace />} />
+              <Route path="/itinerary/day/:day" element={
                 <ProtectedRoute>
-                  <BudgetPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/weather" element={
-                <ProtectedRoute>
-                  <WeatherPage />
+                  <div className="min-h-screen bg-background">
+                    <TripStateProvider>
+                      <div className="max-w-2xl mx-auto p-4">
+                        <DayItinerary />
+                      </div>
+                    </TripStateProvider>
+                  </div>
                 </ProtectedRoute>
               } />
               <Route path="*" element={

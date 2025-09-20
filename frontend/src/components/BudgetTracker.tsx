@@ -53,7 +53,7 @@ const BudgetTracker = () => {
           </div>
         </div>
 
-        {/* Add Expense */}
+        {/* Add Expense - available on itinerary page only; keeping component intact */}
         <div className="p-4 bg-card rounded-2xl border border-border" id="expense-form">
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-semibold text-sm">Add Expense</h4>

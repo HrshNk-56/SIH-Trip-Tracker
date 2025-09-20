@@ -5,25 +5,101 @@ import heroImage from "@/assets/hero-travel.jpg";
 import { useState, useEffect } from "react";
 import { headerService } from "@/services/headerService";
 import { useTripState } from "@/context/TripState";
+import { useNavigate } from "react-router-dom";
+import { tripService } from "@/services/tripService";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar as CalendarWidget } from "@/components/ui/calendar";
+import { Calendar as CalendarIcon } from "lucide-react";
 
 const inr = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
 const toShortDate = (d: Date) => d.toLocaleDateString('en-IN');
 
+const formatDDMMYYYY = (d: Date) => {
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth()+1).padStart(2, '0');
+  const yy = d.getFullYear();
+  return `${dd}-${mm}-${yy}`;
+};
+
+// Parse DD-MM-YYYY or YYYY-MM-DD (and common separators / or -)
+const parseDateFlex = (s?: string): Date | null => {
+  if (!s) return null;
+  const str = s.trim();
+  // Try DD-MM-YYYY or DD/MM/YYYY
+  let m = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (m) {
+    const dd = parseInt(m[1],10), mm = parseInt(m[2],10)-1, yy = parseInt(m[3],10);
+    const d = new Date(yy, mm, dd);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  // Try YYYY-MM-DD
+  m = str.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+  if (m) {
+    const yy = parseInt(m[1],10), mm = parseInt(m[2],10)-1, dd = parseInt(m[3],10);
+    const d = new Date(yy, mm, dd);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+};
+
 const DashboardHeader = () => {
-  const { setLocation } = useTripState();
-  const [destination, setDestination] = useState<string>("Kochi, Kerala");
-  const [startDate, setStartDate] = useState<Date>(new Date("2024-12-15"));
-  const [endDate, setEndDate] = useState<Date>(new Date("2024-12-25"));
+  const navigate = useNavigate();
+  const { setLocation, setDays, setBudget, setPlanned, members } = useTripState();
+  const [destination, setDestination] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
   const [spent, setSpent] = useState<number>(0);
   const [places, setPlaces] = useState<number>(12);
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  const now = new Date();
-  const rawDaysUntil = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  const daysUntilTrip = Math.max(0, rawDaysUntil);
-  const statusLabel = rawDaysUntil > 0 ? 'Upcoming Trip' : (now <= endDate ? 'Ongoing Trip' : 'Completed Trip');
+  // Planning form local state (moved into hero module)
+  const [startFrom, setStartFrom] = useState<string>("");
+  const [planBudget, setPlanBudget] = useState<string>("");
+  const [people, setPeople] = useState<string>("");
+  const [planning, setPlanning] = useState<boolean>(false);
+  const [planError, setPlanError] = useState<string>("");
 
-  const dateRange = `${toShortDate(startDate)} - ${toShortDate(endDate)}`;
+  const now = new Date();
+  const parsedStart = parseDateFlex(startDate);
+  const parsedEnd = parseDateFlex(endDate);
+  const rawDaysUntil = parsedStart ? Math.ceil((parsedStart.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+  const daysUntilTrip = Math.max(0, rawDaysUntil);
+  const statusLabel = (parsedStart && parsedEnd)
+    ? (rawDaysUntil > 0 ? 'Upcoming Trip' : (now <= parsedEnd ? 'Ongoing Trip' : 'Completed Trip'))
+    : 'Plan Trip';
+
+  const dateRange = (parsedStart && parsedEnd) ? `${toShortDate(parsedStart)} - ${toShortDate(parsedEnd)}` : 'Set your dates';
+
+  const handlePlan = async () => {
+    setPlanError("");
+    setPlanning(true);
+    try {
+      if (!destination || !startDate || !endDate) throw new Error('Please set destination and dates');
+      const ps = parseDateFlex(startDate);
+      const pe = parseDateFlex(endDate);
+      if (!ps || !pe) throw new Error('Please use DD-MM-YYYY or YYYY-MM-DD');
+      const days = Math.max(1, Math.ceil((pe.getTime() - ps.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+      setLocation(destination);
+      setDays(days);
+      setBudget(parseFloat(planBudget) || 0);
+      setPlanned(true);
+      try {
+        await tripService.predictTrip({
+          destination,
+          tripType: (parseInt(people||'1') || 1) > 1 ? 'friends' : 'solo',
+          participantCount: parseInt(people||'1') || 1,
+          days,
+          budget: parseFloat(planBudget) || 0,
+        });
+      } catch {}
+      navigate('/itinerary/day/1');
+    } catch (e: any) {
+      setPlanError(e?.message || 'Failed to plan trip');
+    } finally {
+      setPlanning(false);
+    }
+  };
 
   // Load from backend on mount
   useEffect(() => {
@@ -31,8 +107,8 @@ const DashboardHeader = () => {
       try {
         const h = await headerService.get();
         if (h.destination) { setDestination(h.destination); setLocation(h.destination); }
-        if (h.startDate) setStartDate(new Date(h.startDate));
-        if (h.endDate) setEndDate(new Date(h.endDate));
+        if (h.startDate) setStartDate(h.startDate);
+        if (h.endDate) setEndDate(h.endDate);
         if (typeof h.spentINR === 'number') setSpent(h.spentINR);
         if (typeof h.places === 'number') setPlaces(h.places);
       } catch (e) {
@@ -44,8 +120,8 @@ const DashboardHeader = () => {
   const saveHeader = async () => {
     await headerService.update({
       destination,
-      startDate: startDate.toISOString().slice(0,10),
-      endDate: endDate.toISOString().slice(0,10),
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
       spentINR: Math.round(spent),
       places
     });
@@ -101,56 +177,105 @@ const DashboardHeader = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-3">
               <input value={destination} onChange={(e)=>setDestination(e.target.value)} className="px-3 py-2 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30" placeholder="Destination" />
-              <input type="date" value={startDate.toISOString().slice(0,10)} onChange={(e)=>setStartDate(new Date(e.target.value))} className="px-3 py-2 rounded-lg bg-white/20 text-white border border-white/30" />
-              <input type="date" value={endDate.toISOString().slice(0,10)} onChange={(e)=>setEndDate(new Date(e.target.value))} className="px-3 py-2 rounded-lg bg-white/20 text-white border border-white/30" />
-              <input type="number" value={spent} onChange={(e)=>setSpent(parseFloat(e.target.value)||0)} className="px-3 py-2 rounded-lg bg-white/20 text-white border border-white/30" placeholder="Spent (₹)" />
-              <input type="number" value={places} onChange={(e)=>setPlaces(parseInt(e.target.value)||0)} className="px-3 py-2 rounded-lg bg-white/20 text-white border border-white/30" placeholder="Places" />
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="px-3 py-2 rounded-lg bg-white/20 text-white border border-white/30 w-full flex items-center justify-between placeholder-white/70">
+                    <span className="text-left text-sm opacity-90">{startDate || 'DD-MM-YYYY'}</span>
+                    <CalendarIcon className="w-4 h-4 opacity-80" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-auto p-0">
+                  <CalendarWidget
+                    mode="single"
+                    selected={parseDateFlex(startDate) || undefined}
+                    onSelect={(d: any)=> d && setStartDate(formatDDMMYYYY(d))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="px-3 py-2 rounded-lg bg-white/20 text-white border border-white/30 w-full flex items-center justify-between placeholder-white/70">
+                    <span className="text-left text-sm opacity-90">{endDate || 'DD-MM-YYYY'}</span>
+                    <CalendarIcon className="w-4 h-4 opacity-80" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-auto p-0">
+                  <CalendarWidget
+                    mode="single"
+                    selected={parseDateFlex(endDate) || undefined}
+                    onSelect={(d: any)=> d && setEndDate(formatDDMMYYYY(d))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <input type="number" value={spent} onChange={(e)=>setSpent(parseFloat(e.target.value)||0)} className="px-3 py-2 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30" placeholder="Spent (₹)" />
+              <input type="number" value={places} onChange={(e)=>setPlaces(parseInt(e.target.value)||0)} className="px-3 py-2 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30" placeholder="Places" />
             </div>
           )}
-          
-          {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{daysUntilTrip}</div>
-              <div className="text-xs text-white/70">Days Left</div>
+
+          {/* Plan your trip inside hero */}
+          <div className="mt-2 p-3 bg-white/10 rounded-xl border border-white/20">
+            <div className="text-white/90 text-sm font-medium mb-2">Plan your trip</div>
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
+              <input value={startFrom} onChange={(e)=>setStartFrom(e.target.value)} placeholder="Start location (optional)" className="px-3 py-2 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 md:col-span-2" />
+              <input value={destination} onChange={(e)=>setDestination(e.target.value)} placeholder="Destination" className="px-3 py-2 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 md:col-span-2" />
+
+              {/* Start Date Picker */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="px-3 py-2 rounded-lg bg-white/20 text-white border border-white/30 w-full flex items-center justify-between placeholder-white/70">
+                    <span className="text-left text-sm opacity-90">{startDate || 'DD-MM-YYYY'}</span>
+                    <CalendarIcon className="w-4 h-4 opacity-80" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-auto p-0">
+                  <CalendarWidget
+                    mode="single"
+                    selected={parseDateFlex(startDate) || undefined}
+                    onSelect={(d: any)=> d && setStartDate(formatDDMMYYYY(d))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              {/* End Date Picker */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="px-3 py-2 rounded-lg bg-white/20 text-white border border-white/30 w-full flex items-center justify-between placeholder-white/70">
+                    <span className="text-left text-sm opacity-90">{endDate || 'DD-MM-YYYY'}</span>
+                    <CalendarIcon className="w-4 h-4 opacity-80" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-auto p-0">
+                  <CalendarWidget
+                    mode="single"
+                    selected={parseDateFlex(endDate) || undefined}
+                    onSelect={(d: any)=> d && setEndDate(formatDDMMYYYY(d))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <input type="number" min={0} value={planBudget} onChange={(e)=>setPlanBudget(e.target.value)} className="px-3 py-2 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 md:col-span-2" placeholder="Budget (₹)" />
+              <input type="number" min={1} value={people} onChange={(e)=>setPeople(e.target.value)} className="px-3 py-2 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30" placeholder="No. of People" />
             </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{inr.format(spent)}</div>
-              <div className="text-xs text-white/70">Spent</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{places}</div>
-              <div className="text-xs text-white/70">Places</div>
+            {planError && <div className="text-xs text-red-200 mt-2">{planError}</div>}
+            <div className="mt-3 flex justify-center">
+              <Button onClick={handlePlan} disabled={planning} className="rounded-full px-6">
+                {planning ? 'Planning...' : 'Plan Trip with Travel_AI'}
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative mb-4">
-        <input 
-          type="text" 
-          placeholder="Search destinations..." 
-          className="w-full pl-10 pr-4 py-3 rounded-2xl bg-input border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-        />
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </div>
+      {/* Search Bar removed per requirements */}
 
-      {/* Quick Filter Buttons */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {['Hotels', 'Flights', 'Activities', 'Restaurants'].map((filter) => (
-          <Button
-            key={filter}
-            variant="outline"
-            size="sm"
-            className="flex-shrink-0 rounded-full text-xs px-4"
-          >
-            {filter}
-          </Button>
-        ))}
-      </div>
+      {/* Quick Filter Buttons removed per requirements */}
     </div>
   );
 };

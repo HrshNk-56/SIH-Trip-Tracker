@@ -28,6 +28,7 @@ interface TripState {
   days: number;
   budget: number;
   planned: boolean;
+  preferredTransport: string; // '', 'car', 'train', 'flight'
   members: Member[];
   activities: Activity[];
   expenses: Expense[];
@@ -35,6 +36,7 @@ interface TripState {
   setDays: (v: number) => void;
   setBudget: (v: number) => void;
   setPlanned: (v: boolean) => void;
+  setPreferredTransport: (v: string) => void;
   addMember: (name: string) => void;
   removeMember: (id: string) => void;
   addActivity: (a: Omit<Activity, 'id'>) => void;
@@ -50,6 +52,7 @@ export const TripStateProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [days, setDays] = useState<number>(3);
   const [budget, setBudget] = useState<number>(50000);
   const [planned, setPlanned] = useState<boolean>(false);
+  const [preferredTransport, setPreferredTransport] = useState<string>("");
   const [members, setMembers] = useState<Member[]>([
     { id: '1', name: 'You' },
     { id: '2', name: 'Sarah' },
@@ -70,6 +73,7 @@ export const TripStateProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     days,
     budget,
     planned,
+    preferredTransport,
     members,
     activities,
     expenses,
@@ -77,13 +81,14 @@ export const TripStateProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setDays,
     setBudget,
     setPlanned,
+    setPreferredTransport,
     addMember: (name: string) => setMembers(prev => [...prev, { id: Date.now().toString(), name }]),
     removeMember: (id: string) => setMembers(prev => prev.filter(m => m.id !== id)),
     addActivity: (a) => setActivities(prev => [...prev, { id: Date.now().toString(), ...a }]),
     removeActivity: (id: string) => setActivities(prev => prev.filter(a => a.id !== id)),
     addExpense: (e) => setExpenses(prev => [...prev, { id: Date.now().toString(), ...e }]),
     removeExpense: (id: string) => setExpenses(prev => prev.filter(ex => ex.id !== id)),
-  }), [location, days, budget, planned, members, activities, expenses]);
+  }), [location, days, budget, planned, preferredTransport, members, activities, expenses]);
 
   return (
     <TripStateContext.Provider value={value}>{children}</TripStateContext.Provider>
