@@ -17,4 +17,7 @@ func SetUpRoutes(e *echo.Echo) {
 	// Trip Header (singleton) endpoints
 	e.GET("/api/trip-header", controllers.GetTripHeader)
 	e.PUT("/api/trip-header", controllers.UpsertTripHeader)
+
+	// Vision: bill image processing endpoint consumed by frontend
+	e.POST("/image_process/process-bill", controllers.ProcessImage)
 }

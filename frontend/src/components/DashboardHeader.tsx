@@ -45,7 +45,7 @@ const parseDateFlex = (s?: string): Date | null => {
 
 const DashboardHeader = () => {
   const navigate = useNavigate();
-  const { setLocation, setDays, setBudget, setPlanned, members } = useTripState();
+  const { setLocation, setDays, setBudget, setPlanned, setPrediction, members } = useTripState();
   const [destination, setDestination] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
@@ -70,6 +70,10 @@ const DashboardHeader = () => {
     : 'Plan Trip';
 
   const dateRange = (parsedStart && parsedEnd) ? `${toShortDate(parsedStart)} - ${toShortDate(parsedEnd)}` : 'Set your dates';
+  const displayDate = (s?: string) => {
+    const d = parseDateFlex(s);
+    return d ? formatDDMMYYYY(d) : 'DD-MM-YYYY';
+  };
 
   const handlePlan = async () => {
     setPlanError("");
@@ -85,13 +89,14 @@ const DashboardHeader = () => {
       setBudget(parseFloat(planBudget) || 0);
       setPlanned(true);
       try {
-        await tripService.predictTrip({
+        const pred = await tripService.predictTrip({
           destination,
           tripType: (parseInt(people||'1') || 1) > 1 ? 'friends' : 'solo',
           participantCount: parseInt(people||'1') || 1,
           days,
           budget: parseFloat(planBudget) || 0,
         });
+        setPrediction(pred);
       } catch {}
       navigate('/itinerary/day/1');
     } catch (e: any) {
@@ -106,7 +111,10 @@ const DashboardHeader = () => {
     (async () => {
       try {
         const h = await headerService.get();
-        if (h.destination) { setDestination(h.destination); setLocation(h.destination); }
+        if (h.destination && h.destination.trim() && h.destination !== 'Kochi, Kerala') { 
+          setDestination(h.destination); 
+          setLocation(h.destination); 
+        }
         if (h.startDate) setStartDate(h.startDate);
         if (h.endDate) setEndDate(h.endDate);
         if (typeof h.spentINR === 'number') setSpent(h.spentINR);
@@ -181,7 +189,7 @@ const DashboardHeader = () => {
               <Popover>
                 <PopoverTrigger asChild>
                   <button className="px-3 py-2 rounded-lg bg-white/20 text-white border border-white/30 w-full flex items-center justify-between placeholder-white/70">
-                    <span className="text-left text-sm opacity-90">{startDate || 'DD-MM-YYYY'}</span>
+<span className="text-left text-sm opacity-90">{displayDate(startDate)}</span>
                     <CalendarIcon className="w-4 h-4 opacity-80" />
                   </button>
                 </PopoverTrigger>
@@ -228,7 +236,7 @@ const DashboardHeader = () => {
               <Popover>
                 <PopoverTrigger asChild>
                   <button className="px-3 py-2 rounded-lg bg-white/20 text-white border border-white/30 w-full flex items-center justify-between placeholder-white/70">
-                    <span className="text-left text-sm opacity-90">{startDate || 'DD-MM-YYYY'}</span>
+<span className="text-left text-sm opacity-90">{displayDate(startDate)}</span>
                     <CalendarIcon className="w-4 h-4 opacity-80" />
                   </button>
                 </PopoverTrigger>
@@ -246,7 +254,7 @@ const DashboardHeader = () => {
               <Popover>
                 <PopoverTrigger asChild>
                   <button className="px-3 py-2 rounded-lg bg-white/20 text-white border border-white/30 w-full flex items-center justify-between placeholder-white/70">
-                    <span className="text-left text-sm opacity-90">{endDate || 'DD-MM-YYYY'}</span>
+<span className="text-left text-sm opacity-90">{displayDate(endDate)}</span>
                     <CalendarIcon className="w-4 h-4 opacity-80" />
                   </button>
                 </PopoverTrigger>

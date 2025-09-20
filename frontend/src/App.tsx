@@ -238,15 +238,14 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* Main Dashboard Content */}
-      <TripStateProvider>
       <main className="max-w-7xl mx-auto">
         {/* Dashboard Header */}
         <div className="lg:hidden">
           <DashboardHeader />
         </div>
         
-        {/* Desktop Layout */}
-        <div className="hidden lg:block">
+        {/* Desktop Layout disabled to force mobile */}
+        <div className="hidden">
           <div className="p-6">
             <div className="mb-6">
               <h2 className="text-3xl font-bold text-foreground mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
@@ -327,14 +326,13 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
         
-        {/* Mobile Layout */}
-        <div className="lg:hidden">
+        {/* Mobile Layout (forced on all sizes) */}
+        <div>
           <div className="space-y-4 pb-6">
             <TravelBy navigateOnSelect={false} />
           </div>
         </div>
       </main>
-      </TripStateProvider>
     </div>
   );
 };
@@ -383,6 +381,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
+          <TripStateProvider>
           <BrowserRouter>
             <Toaster />
             <Sonner />
@@ -402,11 +401,9 @@ const App = () => (
               <Route path="/choose-transport" element={
                 <ProtectedRoute>
                   <div className="min-h-screen bg-background">
-                    <TripStateProvider>
                       <div className="max-w-2xl mx-auto p-4">
                         <ChooseTransportPage />
                       </div>
-                    </TripStateProvider>
                   </div>
                 </ProtectedRoute>
               } />
@@ -414,11 +411,9 @@ const App = () => (
               <Route path="/itinerary/day/:day" element={
                 <ProtectedRoute>
                   <div className="min-h-screen bg-background">
-                    <TripStateProvider>
                       <div className="max-w-2xl mx-auto p-4">
                         <DayItinerary />
                       </div>
-                    </TripStateProvider>
                   </div>
                 </ProtectedRoute>
               } />
@@ -429,6 +424,7 @@ const App = () => (
               } />
             </Routes>
           </BrowserRouter>
+          </TripStateProvider>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>

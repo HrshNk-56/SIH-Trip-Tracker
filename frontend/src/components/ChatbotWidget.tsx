@@ -11,9 +11,10 @@ interface ChatbotWidgetProps {
   theme?: 'light' | 'kerala';
   size?: 'small' | 'medium';
   className?: string;
+  apiUrl?: string; // optional backend URL for chatBot.py
 }
 
-const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({ theme = 'kerala', size = 'small', className = '' }) => {
+const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({ theme = 'kerala', size = 'small', className = '', apiUrl }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -39,20 +40,60 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({ theme = 'kerala', size = 
     setInputValue('');
     addMessage(msg, 'user');
 
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      // Simple canned responses; can be extended to call ML endpoints or backend
-      if (/budget|cost|price/i.test(msg)) {
-        addMessage('To predict costs, make sure you set the trip location, days, and group size. Then use Predict Costs in Trip Overview.', 'bot');
-      } else if (/activity|plan|do/i.test(msg)) {
-        addMessage('Try adding activities in Trip Overview. You can also mark them Confirmed/Pending.', 'bot');
-      } else if (/member|group/i.test(msg)) {
-        addMessage('Use Travel Group to add/remove members and adjust roles.', 'bot');
-      } else {
-        addMessage("I'm here to help you plan your trip smartly. Ask me about expense planning, activities, or travel tips.", 'bot');
+    const tryPost = async (url: string) => {
+      const ac = new AbortController();
+      const t = setTimeout(() => ac.abort(), 3500);
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg }),
+          signal: ac.signal
+        });
+        if (!res.ok) throw new Error('not ok');
+        const data = await res.json();
+        const reply = data.reply || data.message || data.text || JSON.stringify(data);
+        return reply as string;
+      } finally {
+        clearTimeout(t);
       }
-    }, 800);
+    };
+
+    setIsTyping(true);
+    try {
+      const env = (import.meta as any).env || {};
+      const candidates = [
+        apiUrl,
+        env?.VITE_CHATBOT_API,
+        (env?.VITE_ML_API ? `${env.VITE_ML_API.replace(/\/$/, '')}/chatbot/query` : undefined),
+        `${window.location.origin}/chatbot/query`
+      ].filter(Boolean) as string[];
+
+      let replied = false;
+      for (const url of candidates) {
+        try {
+          const reply = await tryPost(url);
+          addMessage(reply, 'bot');
+          replied = true;
+          break;
+        } catch { /* try next */ }
+      }
+
+      if (!replied) {
+        // Silent fallback responses based on intent
+        if (/budget|cost|price/i.test(msg)) {
+          addMessage('Budget tip: keep receipts using Scan bills. Set destination, days and people to plan.', 'bot');
+        } else if (/activity|plan|do/i.test(msg)) {
+          addMessage('Try “Suggested nearby” to add places to your plan for the day.', 'bot');
+        } else if (/member|group/i.test(msg)) {
+          addMessage('Use Travel Group to add or remove members.', 'bot');
+        } else {
+          addMessage('Got it! I will connect to the chatbot backend automatically when available.', 'bot');
+        }
+      }
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (

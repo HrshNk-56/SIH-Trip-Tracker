@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
+import { TripPredictionResponse } from "@/services/tripService";
 
 export type ActivityStatus = 'Confirmed' | 'Pending';
 
@@ -8,6 +9,9 @@ export interface Activity {
   time: string;
   location: string;
   status: ActivityStatus;
+  day?: number; // 1,2,3 - optional day association
+  description?: string; // optional "why visit" line
+  rating?: number; // optional rating if available
 }
 
 export interface Member {
@@ -29,6 +33,7 @@ interface TripState {
   budget: number;
   planned: boolean;
   preferredTransport: string; // '', 'car', 'train', 'flight'
+  prediction: TripPredictionResponse | null;
   members: Member[];
   activities: Activity[];
   expenses: Expense[];
@@ -37,6 +42,7 @@ interface TripState {
   setBudget: (v: number) => void;
   setPlanned: (v: boolean) => void;
   setPreferredTransport: (v: string) => void;
+  setPrediction: (p: TripPredictionResponse | null) => void;
   addMember: (name: string) => void;
   removeMember: (id: string) => void;
   addActivity: (a: Omit<Activity, 'id'>) => void;
@@ -48,21 +54,19 @@ interface TripState {
 const TripStateContext = createContext<TripState | undefined>(undefined);
 
 export const TripStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [location, setLocation] = useState<string>('Kochi, Kerala');
+  const [location, setLocation] = useState<string>('');
   const [days, setDays] = useState<number>(3);
   const [budget, setBudget] = useState<number>(50000);
   const [planned, setPlanned] = useState<boolean>(false);
   const [preferredTransport, setPreferredTransport] = useState<string>("");
+  const [prediction, setPrediction] = useState<TripPredictionResponse | null>(null);
   const [members, setMembers] = useState<Member[]>([
     { id: '1', name: 'You' },
     { id: '2', name: 'Sarah' },
     { id: '3', name: 'John' },
     { id: '4', name: 'Maya' },
   ]);
-  const [activities, setActivities] = useState<Activity[]>([
-    { id: '1', title: 'Fort Kochi Heritage Walk', time: '09:00 AM', location: 'Fort Kochi', status: 'Confirmed' },
-    { id: '2', title: 'Backwater Cruise', time: '02:00 PM', location: 'Vembanad Lake', status: 'Pending' },
-  ]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([
     { id: 'e1', title: 'Hotel Booking - Grand Hotel', amount: 4500, category: 'Accommodation', date: '2025-09-15' },
     { id: 'e2', title: 'Flight Tickets', amount: 12000, category: 'Transportation', date: '2025-09-14' },
@@ -74,6 +78,7 @@ export const TripStateProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     budget,
     planned,
     preferredTransport,
+    prediction,
     members,
     activities,
     expenses,
@@ -82,13 +87,14 @@ export const TripStateProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setBudget,
     setPlanned,
     setPreferredTransport,
+    setPrediction,
     addMember: (name: string) => setMembers(prev => [...prev, { id: Date.now().toString(), name }]),
     removeMember: (id: string) => setMembers(prev => prev.filter(m => m.id !== id)),
     addActivity: (a) => setActivities(prev => [...prev, { id: Date.now().toString(), ...a }]),
     removeActivity: (id: string) => setActivities(prev => prev.filter(a => a.id !== id)),
     addExpense: (e) => setExpenses(prev => [...prev, { id: Date.now().toString(), ...e }]),
     removeExpense: (id: string) => setExpenses(prev => prev.filter(ex => ex.id !== id)),
-  }), [location, days, budget, planned, preferredTransport, members, activities, expenses]);
+  }), [location, days, budget, planned, preferredTransport, prediction, members, activities, expenses]);
 
   return (
     <TripStateContext.Provider value={value}>{children}</TripStateContext.Provider>
