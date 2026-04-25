@@ -108,7 +108,8 @@
   | Harsh Naik | [@HrsHnk-56](https://github.com/HrsHnk-56) |
   | Yash Kumar Gupta | [@AurReaper](https://github.com/AurReaper) |                                                                                                                                                                              
   | Kriti Raj | [@kriti1220](https://github.com/kriti1220) |
-  | Hridambiswas | [@Hridambiswas](https://github.com/Hridambiswas) |                                                                                                                                                                            
+  | Hridam Biswas | [@Hridambiswas](https://github.com/Hridambiswas) |    
+  | Priyanshu Kumar Singh | [@priyanshukumar-singh](https://github.com/priyanshukumar-singh) |  
                                                                         
                                                                                                                                                                                                                                                  
   ---
