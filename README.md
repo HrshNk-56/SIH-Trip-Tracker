@@ -66,11 +66,10 @@
    
   **Prerequisites** — Node.js v18+, Go 1.21+, Python 3.10+, PostgreSQL or MySQL, Docker *(optional)*                                                                                                                                             
                                                             
-  ### 🖥️  Frontend                                                                                                                                                                                                                                
-  ```bash                                                   
+  ### 🖥️  Frontend                                                                                                                                                                                                                                                                                  
   cd frontend
   npm install
-  npm run dev                                                                                                                                                                                                                                
+  npm run dev                                                                                                                                                                                                                           
    
   ⚙️  Backend                                                                                                                                                                                                                                     
                                                             
