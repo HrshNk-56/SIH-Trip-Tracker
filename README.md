@@ -1,72 +1,122 @@
- ---                                                                                                                                                                                                                                            
-  # SIH Trip Tracker — Team MapMyWay
-                                    
-  A full-stack trip tracking and expense management system built for Smart India Hackathon (SIH). The application combines GPS trajectory analysis, AI-powered travel classification, OCR-based expense tracking, and a conversational AI        
-  assistant to deliver an intelligent travel companion.                                                                                                                                                                                          
+  
+  # 🗺️  SIH Trip Tracker — Team MapMyWay                                                                                                                                                                                                          
+                                                                                                                                                                                                                                               
+  A full-stack trip tracking and expense management system built for **Smart India Hackathon (SIH)**. The platform combines GPS trajectory analysis, AI-powered travel classification, OCR-based expense tracking, and a conversational AI       
+  assistant into one intelligent travel companion.                                                                                                                                                                                             
                                                                                                                                                                                                                                                  
-  ## Key Capabilities                                                                                                                                                                                                                            
-                     
-  The platform integrates three parallel AI models — a GPS-based travel classifier, a Phi-3 Mini conversational assistant, and an OCR expense processor. Users can log trips, automatically classify them as business or leisure, track budgets
-  with real-time alerts, and get contextual answers through the built-in chatbot. The system supports CSV/JSON data exports and is deployable via Docker.                                                                                        
-                                                                                                                                                         
-  **Budget States**: Safe (under 80%) → Warning (80–100%) → Exceeded (over 100%)                                                                                                                                                                 
+  ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)                                                                                                                              
+  ![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)
+  ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)                                                                                                                                            
+  ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)                                                                                                                                          
+  ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)                                                                                                                              
+  ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)                                                                                                                                          
                                                                                                                                                                                                                                                  
-  ## Tech Stack
+  ---                                                                                                                                                                                                                                            
                                                                                                                                                                                                                                                  
-  **Frontend** — React + TypeScript with mobile-responsive design and real-time budget state updates.
+  ## 🌟 Features                                                                                                                                                                                                                               
+
+  ### 🧭 Trip Tracking
+  - 📍 GPS trajectory analysis using Haversine formula
+  - 🗂️  Process `.plt` GPS files for journey data
+  - 📊 Automatic classification — Business or Leisure                                                                                                                                                                                            
+   
+  ### 💸 Expense Management                                                                                                                                                                                                                      
+  - 🧾 OCR pipeline to extract amounts from receipts                                                                                                                                                                                           
+  - 🟢 Safe (under 80%) → 🟡 Warning (80–100%) → 🔴 Exceeded (over 100%)
+  - 📤 Export data as CSV / JSON                                                                                                                                                                                                                 
+   
+  ### 🤖 AI Capabilities                                                                                                                                                                                                                         
+  - 💬 Conversational assistant powered by **Phi-3 Mini**                                                                                                                                                                                      
+  - 🧠 Logistic regression model for travel classification                                                                                                                                                                                       
+  - 🔍 Multi-modal AI integration across three parallel models
                                                                                                                                                                                                                                                  
-  **Backend** — Go with Echo Framework handling REST API routing, JWT authentication, and AI model integration through dedicated controllers.
+  ### 🔐 Auth & Infrastructure                                                                                                                                                                                                                 
+  - 🔑 JWT-based user authentication
+  - 🐳 Docker deployment support                                                                                                                                                                                                                 
+  - 📱 Mobile-responsive React frontend
                                                                                                                                                                                                                                                  
-  **AI/ML** — Python powering three models: logistic regression on Haversine-processed GPS trajectories for travel classification, Phi-3 Mini for the conversational assistant, and an OCR pipeline for receipt-based expense extraction.
-                                                                                                                                                                                                                                                 
-  **Database** — PostgreSQL / MySQL for trip data, user sessions, and expense records.
-                                                                                                                                                                                                                                                 
-  ## Project Structure
-                                                                                                                                                                                                                                                 
+  ---                                                                                                                                                                                                                                          
+
+  ## 🛠️  Tech Stack
+
+  | Layer | Technologies |
+  |-------|-------------|
+  | **Frontend** | React, TypeScript, CSS |
+  | **Backend** | Go, Echo Framework |                                                                                                                                                                                                           
+  | **AI / ML** | Python, Logistic Regression, Phi-3 Mini, OCR |
+  | **Database** | PostgreSQL / MySQL |                                                                                                                                                                                                          
+  | **DevOps** | Docker |                                                                                                                                                                                                                        
+                         
+  ---                                                                                                                                                                                                                                            
+                                                            
+  ## 📁 Project Structure
+                         
+  \`\`\`
   SIH-Trip-Tracker/
   ├── app/          # Mobile application code
-  ├── backend/      # Go REST API (Echo Framework)                                                                                                                                                                                               
+  ├── backend/      # Go REST API (Echo Framework)
   ├── frontend/     # React + TypeScript web interface                                                                                                                                                                                           
-  ├── models/       # Python ML models and data schemas                                                                                                                                                                                          
+  ├── models/       # Python ML models and schemas    
   ├── scripts/      # Utility and automation scripts                                                                                                                                                                                             
-  ├── design/       # UI/UX design assets
+  ├── design/       # UI/UX design assets                   
   └── docs/         # Architecture diagrams and flowcharts                                                                                                                                                                                       
-                  
-  ## Setup                                                                                                                                                                                                                                       
-                  
-  **Prerequisites**: Node.js v18+, Go 1.21+, Python 3.10+, PostgreSQL or MySQL, Docker (optional).                                                                                                                                               
-   
-  **Backend**                                                                                                                                                                                                                                    
-  ```bash         
+  \`\`\`                                                  
+                                                                                                                                                                                                                                                 
+  ---                                                       
+     
+  ## 🚀 Getting Started
+                       
+  ### Prerequisites
+  - Node.js v18+, Go 1.21+, Python 3.10+, PostgreSQL or MySQL, Docker *(optional)*
+                                                                                  
+  ### 🖥️  Frontend                                                                                                                                                                                                                                
+  \`\`\`bash     
+  cd frontend                                                                                                                                                                                                                                    
+  npm install                                               
+  npm run dev
+  \`\`\`                                                                                                                                                                                                                                         
+        
+  ### ⚙️  Backend                                                                                                                                                                                                                                 
+  \`\`\`bash                                                
   cd backend
   go mod tidy
   go run main.go
-
-  Frontend
-  cd frontend
-  npm install
-  npm run dev
-             
-  ML Models
-  cd models                                                                                                                                                                                                                                      
-  python -m venv venv
-  source venv/bin/activate                                                                                                                                                                                                                       
+  \`\`\`        
+        
+  ### 🧠 ML Models
+  \`\`\`bash                                                                                                                                                                                                                                     
+  cd models 
+  python -m venv venv                                                                                                                                                                                                                            
+  source venv/bin/activate                                  
   pip install -r requirements.txt
   python app.py                  
-               
-  Docker (optional)
-  docker-compose up --build                                                                                                                                                                                                                      
-   
-  Team                                                                                                                                                                                                                                           
-                  
-  Built by Team MapMyWay for Smart India Hackathon (SIH).                                                                                                                                                                                        
-   
-  ┌──────────────────┬──────────────────────────────┐                                                                                                                                                                                            
-  │       Name       │            GitHub            │
-  ├──────────────────┼──────────────────────────────┤
-  │ Harsh Naik       │ https://github.com/HrsHnk-56 │
-  ├──────────────────┼──────────────────────────────┤
-  │ Yash Kumar Gupta │ https://github.com/AurReaper │                                                                                                                                                                                            
-  └──────────────────┴──────────────────────────────┘
+  \`\`\`       
+        
+  ### 🐳 Docker *(optional)*
+  \`\`\`bash                                                                                                                                                                                                                                     
+  docker-compose up --build
+  \`\`\`                                                                                                                                                                                                                                         
+                                                            
+  ---
+     
+  ## 👥 Team
+            
+  Built with ❤️  by **Team MapMyWay** for Smart India Hackathon (SIH).
                                                                                                                                                                                                                                                  
-  ---                             
+  | Name | GitHub |                                                                                                                                                                                                                              
+  |------|--------|                                         
+  | Harsh Naik | [@HrsHnk-56](https://github.com/HrsHnk-56) |
+  | Yash Kumar Gupta | [@AurReaper](https://github.com/AurReaper) |
+  | Kriti Raj | [@kriti-raj](https://github.com/kriti-raj) |                                                                                                                                                                                     
+  | Hridambiswas | [@Hridambiswas](https://github.com/Hridambiswas) |                                                                                                                                                                       
+  ---
+                                                                                                                                                                                                                                                 
+  ## 🤝 Contributing                                        
+                    
+  Contributions are welcome! Please fork the repository and submit a Pull Request.
+                                                                                                                                                                                                                                                 
+  ## 📝 License
+                                                                                                                                                                                                                                                 
+  This project is open source and available under the [MIT License](LICENSE).
+
+  ---
